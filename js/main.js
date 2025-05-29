@@ -4,13 +4,6 @@
  	once: false
  });
 
-
-let isDragging = false;
-let dragStartX = 0;
-let dragStartY = 0;
-
-
-
 jQuery(document).ready(function($) {
 
 	"use strict";
@@ -116,6 +109,13 @@ jQuery(document).ready(function($) {
 	// sitePlusMinus();
 
 
+     
+
+
+
+
+
+  
 
 	var siteSliderRange = function() {
     $( "#slider-range" ).slider({
@@ -131,6 +131,7 @@ jQuery(document).ready(function($) {
       " - $" + $( "#slider-range" ).slider( "values", 1 ) );
 	};
 	// siteSliderRange();
+
 
 	
 	var siteCarousel = function () {
@@ -181,6 +182,12 @@ jQuery(document).ready(function($) {
 	    navText: ['<span class="icon-keyboard_arrow_left">', '<span class="icon-keyboard_arrow_right">']
 	  });
 
+
+
+
+
+
+	  
 
 	  $('.slide-link').on('click', function(e) {
 		e.preventDefault();
@@ -297,6 +304,7 @@ jQuery(document).ready(function($) {
 });
 
 
+
 $(document).ready(function () {
 	const element = $('#infinite-typing');
 	const phrases = element.data('typing');
@@ -323,6 +331,11 @@ $(document).ready(function () {
 
 	typeWriter();
 });
+
+
+
+
+
 
 
   // Добавить в конец файла
@@ -385,50 +398,140 @@ $(document).ready(function() {
     });
 });
 
- // Обработчики для ссылок в карточке "О компании"
-  document.addEventListener("DOMContentLoaded", function () {
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
   const track = document.querySelector(".carousel-track");
   const slides = Array.from(track.children);
   const nextBtn = document.querySelector(".carousel-nav.next");
   const prevBtn = document.querySelector(".carousel-nav.prev");
-  const CLICK_THRESHOLD = 5;
-
   let currentIndex = 0;
-  let autoplay;
-  let isDragging = false;
-  let hasMoved = false;
-  let touchMoved = false;
-  let startX = 0;
-  let touchStartX = 0;
-  let prevTranslate = 0;
-  let currentTranslate = 0;
 
-  // Центрирование первого слайда
-  function applyInitialPadding() {
-    const firstSlide = slides[0];
-    const container = track.parentElement;
-    const slideW = firstSlide.offsetWidth;
-    const contW = container.offsetWidth;
-    track.style.paddingLeft = `${(contW - slideW) / 2}px`;
+  function updateSlidePosition() {
+    const slideWidth = slides[0].getBoundingClientRect().width;
+    track.style.transform = `translateX(-${slideWidth * currentIndex}px)`;
   }
 
-  // Перемещение карусели на currentIndex
+  nextBtn.addEventListener("click", () => {
+    currentIndex = (currentIndex + 1) % slides.length;
+    updateSlidePosition();
+  });
+
+  prevBtn.addEventListener("click", () => {
+    currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+    updateSlidePosition();
+  });
+
+  window.addEventListener("resize", updateSlidePosition);
+});
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  const track = document.querySelector(".carousel-track");
+  const slides = Array.from(track.children);
+  const nextBtn = document.querySelector(".carousel-nav.next");
+  const prevBtn = document.querySelector(".carousel-nav.prev");
+  let currentIndex = 0;
+
   function updateCarousel() {
-    const slide = slides[currentIndex];
-    const slideW = slide.offsetWidth;
-    const cont = track.parentElement;
-    const contW = cont.offsetWidth;
-    const offset = slide.offsetLeft - (contW - slideW) / 2;
+  const track = document.querySelector(".carousel-track");
+  const slides = Array.from(track.children);
+  const slide = slides[currentIndex];
+  const slideWidth = slide.offsetWidth;
+  const container = track.parentElement; // .carousel-track-container
+  const containerWidth = container.offsetWidth;
 
-    track.style.transition = "transform 0.5s ease-in-out";
-    track.style.transform = `translateX(-${offset}px)`;
+  const slideLeft = slide.offsetLeft;
 
-    slides.forEach((s, i) => {
-      s.classList.toggle("current", i === currentIndex);
-      s.classList.toggle("prev", i === (currentIndex - 1 + slides.length) % slides.length);
-      s.classList.toggle("next", i === (currentIndex + 1) % slides.length);
-    });
+  const offset = slideLeft - (containerWidth - slideWidth) / 2;
+
+  track.style.transition = "transform 0.5s ease-in-out";
+  track.style.transform = `translateX(-${offset}px)`;
+
+  slides.forEach((slideEl, idx) => {
+    slideEl.classList.remove('prev', 'current', 'next');
+    if (idx === currentIndex) slideEl.classList.add('current');
+    if (idx === (currentIndex - 1 + slides.length) % slides.length) slideEl.classList.add('prev');
+    if (idx === (currentIndex + 1) % slides.length) slideEl.classList.add('next');
+  });
+}
+
+function applyInitialPadding() {
+  const track = document.querySelector(".carousel-track");
+  const firstSlide = track?.children[0];
+  const container = track?.parentElement;
+
+  if (firstSlide && container) {
+    const slideWidth = firstSlide.offsetWidth;
+    const containerWidth = container.offsetWidth;
+    const leftPadding = (containerWidth - slideWidth) / 2;
+
+    track.style.paddingLeft = `${leftPadding}px`;
   }
+}
+
+
+
+window.addEventListener("load", () => {
+  applyInitialPadding();
+  updateCarousel();
+});
+
+window.addEventListener("resize", () => {
+  applyInitialPadding();
+  updateCarousel();
+});
+
+  nextBtn.addEventListener("click", () => {
+    currentIndex = (currentIndex + 1) % slides.length;
+    updateCarousel();
+    resetAutoplay();
+  });
+
+  prevBtn.addEventListener("click", () => {
+    currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+    updateCarousel();
+    resetAutoplay();
+  });
+
+  window.addEventListener("resize", updateCarousel);
+
+
+
+
+ // Обработчики для ссылок в карточке "О компании"
+  document.querySelectorAll('#main-floatcard a[data-slide]').forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      currentIndex = parseInt(this.getAttribute('data-slide'), 10);
+      updateCarousel();
+      document.querySelector('.custom-carousel-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+
+    // Ссылки в хедере меню
+  document.querySelectorAll('a.slide-link[data-slide]').forEach(link=>{
+    link.addEventListener('click',function(e){
+      e.preventDefault();
+      currentIndex=parseInt(this.getAttribute('data-slide'),10);
+      updateCarousel();
+      document.querySelector('.custom-carousel-section').scrollIntoView({behavior:'smooth',block:'center'});
+    });
+  });
+
+  // Инициализируем карусель на старте
+  updateCarousel();
+  
+
+  let autoplay = setInterval(() => {
+    currentIndex = (currentIndex + 1) % slides.length;
+    updateCarousel();
+  }, 5000);
 
   function resetAutoplay() {
     clearInterval(autoplay);
@@ -437,32 +540,20 @@ $(document).ready(function() {
       updateCarousel();
     }, 5000);
   }
-  
-  
 
+  // Drag support (LKM)
+  let isDragging = false;
+  let startX = 0;
+  let currentTranslate = 0;
+  let prevTranslate = 0;
 
+  const trackContainer = track.parentElement; // предполагаем, что .carousel-track находится внутри контейнера
 
-  // Навигация кнопками
-  nextBtn.addEventListener("click", () => {
-    currentIndex = (currentIndex + 1) % slides.length;
-    updateCarousel();
-    resetAutoplay();
-  });
-  prevBtn.addEventListener("click", () => {
-    currentIndex = (currentIndex - 1 + slides.length) % slides.length;
-    updateCarousel();
-    resetAutoplay();
-  });
-
-  // Drag / Touch-события на track, но игнорируем, если началось по ссылке
-  const trackContainer = track.parentElement;
   trackContainer.style.cursor = "grab";
   trackContainer.style.userSelect = "none";
 
   trackContainer.addEventListener("mousedown", (e) => {
-    if (e.target.closest("a.card-tov")) return;
     isDragging = true;
-    hasMoved = false;
     startX = e.pageX;
     prevTranslate = getCurrentOffset();
     track.style.transition = "none";
@@ -473,59 +564,29 @@ $(document).ready(function() {
   trackContainer.addEventListener("mousemove", (e) => {
     if (!isDragging) return;
     const dx = e.pageX - startX;
-    if (Math.abs(dx) > CLICK_THRESHOLD) hasMoved = true;
     currentTranslate = prevTranslate + dx;
     track.style.transform = `translateX(${currentTranslate}px)`;
   });
 
-  trackContainer.addEventListener("mouseup", (e) => {
+  trackContainer.addEventListener("mouseup", dragEnd);
+  trackContainer.addEventListener("mouseleave", dragEnd);
+
+  function dragEnd(e) {
     if (!isDragging) return;
     isDragging = false;
-    dragEnd(e.pageX);
-  });
+    trackContainer.style.cursor = "grab";
 
-  trackContainer.addEventListener("mouseleave", (e) => {
-    if (!isDragging) return;
-    isDragging = false;
-    dragEnd(e.pageX);
-  });
+    const dx = e.pageX - startX;
+    const slideWidth = slides[0].getBoundingClientRect().width;
 
-  trackContainer.addEventListener("touchstart", (e) => {
-    if (e.target.closest("a.card-tov")) return;
-    isDragging = true;
-    touchMoved = false;
-    touchStartX = e.touches[0].clientX;
-    prevTranslate = getCurrentOffset();
-    track.style.transition = "none";
-    clearInterval(autoplay);
-  });
-
-  trackContainer.addEventListener("touchmove", (e) => {
-    if (!isDragging) return;
-    const currentX = e.touches[0].clientX;
-    const dx = currentX - touchStartX;
-    if (Math.abs(dx) > CLICK_THRESHOLD) touchMoved = true;
-    currentTranslate = prevTranslate + dx;
-    track.style.transform = `translateX(${currentTranslate}px)`;
-  });
-
-  trackContainer.addEventListener("touchend", (e) => {
-    if (!isDragging) return;
-    isDragging = false;
-    dragEnd(e.changedTouches[0].clientX);
-  });
-
-  function dragEnd(endX) {
-    const dx = endX - startX;
-    const slideW = slides[0].offsetWidth;
-    if (dx < -slideW / 3 && currentIndex < slides.length - 1) {
+    if (dx < -slideWidth / 3 && currentIndex < slides.length - 1) {
       currentIndex++;
-    } else if (dx > slideW / 3 && currentIndex > 0) {
+    } else if (dx > slideWidth / 3 && currentIndex > 0) {
       currentIndex--;
     }
+
     updateCarousel();
     resetAutoplay();
-    trackContainer.style.cursor = "grab";
   }
 
   function getCurrentOffset() {
@@ -534,74 +595,8 @@ $(document).ready(function() {
     return matrix.m41;
   }
 
-  // Обработчик клика/тач по карточке
-  document.querySelectorAll("a.card-tov").forEach(card => {
-    card.addEventListener("click", function(e) {
-      // если до этого был drag/swipe — не обрабатываем клик
-      if (hasMoved) {
-        hasMoved = false;
-        return;
-      }
-      const href = this.getAttribute("href");
-      if (href && href.startsWith("#")) {
-        const target = document.querySelector(href);
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }
-    });
-    card.addEventListener("touchend", function(e) {
-      if (touchMoved) {
-        touchMoved = false;
-        return;
-      }
-      const href = this.getAttribute("href");
-      if (href && href.startsWith("#")) {
-        const target = document.querySelector(href);
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }
-    });
-  });
-
-
-  
-
-  // Старт
-  applyInitialPadding();
+  // Инициализация
   updateCarousel();
-  autoplay = setInterval(() => {
-    currentIndex = (currentIndex + 1) % slides.length;
-    updateCarousel();
-  }, 5000);
-
-  window.addEventListener("resize", () => {
-    applyInitialPadding();
-    updateCarousel();
-  });
-});
-
-const track = document.querySelector('.carousel-track-container');
-
-track.addEventListener('mousedown', e => {
-  dragStartX = e.clientX;
-  dragStartY = e.clientY;
-  isDragging = false;
-});
-
-track.addEventListener('mousemove', e => {
-  const dx = Math.abs(e.clientX - dragStartX);
-  const dy = Math.abs(e.clientY - dragStartY);
-  if (dx > 5 || dy > 5) {
-    isDragging = true;
-  }
-});
-
-track.addEventListener('mouseup', () => {
-  setTimeout(() => { isDragging = false; }, 50); // сброс после возможного клика
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -660,6 +655,23 @@ document.addEventListener('DOMContentLoaded', () => {
     camera.updateProjectionMatrix();
   });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // -----------------------------------------------------------Рабочий	1
 // <- Используем ID секции
@@ -800,20 +812,252 @@ const fileInput = document.getElementById('file');
         : 'Добавить файл';
     });
 
-document.querySelectorAll("a.card-tov").forEach(card => {
-  card.addEventListener("click", function (e) {
-    if (isDragging) {
-      e.preventDefault(); // отменяем переход, если был drag
-      return;
-    }
 
-    const href = this.getAttribute("href");
-    if (href && href.startsWith("#")) {
-      e.preventDefault();
-      const target = document.querySelector(href);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+
+
+
+
+
+
+
+
+
+
+// -----------------------------------------------------------Рабочий	2
+// document.addEventListener('DOMContentLoaded', () => {
+//     const section = document.querySelector('.ocomp');
+//     const cards = [...document.querySelectorAll('.floatcard')];
+//     const nextSection = document.querySelector('.scrollsnap-next');
+
+//     let hasPlayed = false;
+
+//     const animateCardsIn = () => {
+//         cards.forEach((card, i) => {
+//             setTimeout(() => {
+//                 card.classList.add('float-in');
+//             }, i * 400);
+//         });
+//     };
+
+//     const animateCardsOut = () => {
+//         cards.forEach((card, i) => {
+//             setTimeout(() => {
+//                 card.classList.remove('float-in');
+//                 card.classList.add('float-out');
+//             }, i * 300);
+//         });
+//     };
+
+//     const scrollToNextSection = () => {
+//         nextSection.scrollIntoView({ behavior: 'smooth' });
+//     };
+
+//     const handleScrollInSection = () => {
+//         const rect = section.getBoundingClientRect();
+//         const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+
+//         if (isVisible && !hasPlayed && window.scrollY > rect.top + 50) {
+//             hasPlayed = true;
+
+//             animateCardsIn();
+
+//             setTimeout(() => {
+//                 animateCardsOut();
+
+//                 setTimeout(() => {
+//                     scrollToNextSection();
+//                 }, cards.length * 300 + 500);
+//             }, cards.length * 400 + 1000);
+//         }
+//     };
+
+//     window.addEventListener('scroll', handleScrollInSection, { passive: true });
+// });
+
+
+
+
+
+
+
+
+
+
+let isDragging = false;
+let startX = 0;
+let currentTranslate = 0;
+let prevTranslate = 0;
+const CLICK_THRESHOLD = 5; // Порог в пикселях для определения клика
+
+// Основной код карусели
+const trackContainer = track.parentElement;
+trackContainer.style.cursor = "grab";
+trackContainer.style.userSelect = "none";
+
+// Обработчики событий для мыши
+trackContainer.addEventListener("mousedown", (e) => {
+  isDragging = true;
+  startX = e.pageX;
+  prevTranslate = getCurrentOffset();
+  track.style.transition = "none";
+  clearInterval(autoplay);
+  trackContainer.style.cursor = "grabbing";
+});
+
+trackContainer.addEventListener("mousemove", (e) => {
+  if (!isDragging) return;
+  
+  const dx = e.pageX - startX;
+  currentTranslate = prevTranslate + dx;
+  track.style.transform = `translateX(${currentTranslate}px)`;
+});
+
+trackContainer.addEventListener("mouseup", (e) => {
+  dragEnd(e);
+});
+
+trackContainer.addEventListener("mouseleave", (e) => {
+  dragEnd(e);
+});
+
+// Обработчики для кликов на карточках
+document.querySelectorAll('.product-card').forEach(card => {
+  card.addEventListener('click', (e) => {
+    // Проверяем, было ли движение мышью (перетаскивание)
+    const isActualClick = Math.abs(e.pageX - startX) <= CLICK_THRESHOLD;
+    
+    if (isActualClick && !isDragging) {
+      // Ваш код перехода на форму
+      window.location.href = card.dataset.formLink;
     }
   });
 });
+
+let touchStartX = 0;
+
+trackContainer.addEventListener("touchstart", (e) => {
+  isDragging = true;
+  touchStartX = e.touches[0].clientX;
+  prevTranslate = getCurrentOffset();
+  track.style.transition = "none";
+  clearInterval(autoplay);
+});
+
+trackContainer.addEventListener("touchmove", (e) => {
+  if (!isDragging) return;
+  
+  const currentX = e.touches[0].clientX;
+  const dx = currentX - touchStartX;
+  currentTranslate = prevTranslate + dx;
+  track.style.transform = `translateX(${currentTranslate}px)`;
+});
+
+trackContainer.addEventListener("touchend", (e) => {
+  isDragging = false;
+  
+  const endX = e.changedTouches[0].clientX;
+  const dx = endX - touchStartX;
+  const slideWidth = slides[0].getBoundingClientRect().width;
+
+  if (dx < -slideWidth / 3 && currentIndex < slides.length - 1) {
+    currentIndex++;
+  } else if (dx > slideWidth / 3 && currentIndex > 0) {
+    currentIndex--;
+  }
+
+  updateCarousel();
+  resetAutoplay();
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// document.addEventListener('DOMContentLoaded', () => {
+//     const header = document.querySelector('.site-navbar');
+//     const targetSection = document.querySelector('.ocomp');
+//     let lastScrollY = window.scrollY;
+//     let rafId = null;
+//     const offset = 100; // Порог (в пикселях) после нижней границы секции
+
+//     if (!header || !targetSection) return;
+
+//     const getSectionBounds = () => {
+//         const rect = targetSection.getBoundingClientRect();
+//         return {
+//             top: rect.top + window.scrollY,
+//             bottom: rect.bottom + window.scrollY
+//         };
+//     };
+
+//     const updateHeaderState = () => {
+//         const currentScrollY = window.scrollY;
+//         const scrollDirection = currentScrollY > lastScrollY ? 'down' : 'up';
+//         const section = getSectionBounds();
+//         const isBelowSection = currentScrollY > section.bottom;
+
+//         // Если прокрутка вверх – всегда показываем хедер
+//         if (scrollDirection === 'up') {
+//             header.classList.remove('site-navbar--hidden');
+//         }
+//         // Если внутри секции – скрываем хедер
+//         else if (currentScrollY > section.top && currentScrollY < section.bottom) {
+//             header.classList.add('site-navbar--hidden');
+//         }
+//         // Если ниже секции
+//         else if (isBelowSection) {
+//             // Если прокрутили достаточно далеко (более offset пикселей) ниже нижней границы секции
+//             if (currentScrollY > section.bottom + offset) {
+//                 header.classList.remove('site-navbar--hidden'); // показываем хедер
+//             } else {
+//                 header.classList.add('site-navbar--hidden'); // иначе пока скрываем
+//             }
+//         }
+
+//         lastScrollY = currentScrollY;
+//         rafId = null;
+//     };
+
+//     window.addEventListener('scroll', () => {
+//         if (!rafId) {
+//             rafId = requestAnimationFrame(updateHeaderState);
+//         }
+//     });
+
+//     window.addEventListener('resize', () => {
+//         if (!rafId) {
+//             rafId = requestAnimationFrame(updateHeaderState);
+//         }
+//     }, { passive: true });
+// });
+// Наблюдаем за элементом с ID
